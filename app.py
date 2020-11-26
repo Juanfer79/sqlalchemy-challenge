@@ -123,48 +123,73 @@ def tobs():
     return jsonify(tobs_data)
 
 
-@app.route("/api/v1.0/<start>")
-def above(start):
-    print(f"Server received a GET request on /api/v1.0/{start}")
+@app.route("/api/v1.0/<date>")
+def above(date):
+    print(f"Server received a GET request on /api/v1.0/{date}")
     
-    # Get the max temperature above the date provided
-    max_temp = (
+    
+    maximum = (
         session
         .query(func.max(measurement.tobs))
-        .filter(measurement.date >= start)
+        .filter(measurement.date >= date)
         .all()
     )
 
-    # Get the min temperature above the date provided
-    min_temp = (
+    minimum = (
         session
         .query(func.min(measurement.tobs))
-        .filter(measurement.date >= start)
+        .filter(measurement.date >= date)
         .all()
     )
     
-    # Get the average of temperature from the date and above
-    avg_temp = (
+    average = (
         session
-        .query(func.min(measurement.tobs))
-        .filter(measurement.date >= start)
+        .query(func.avg(measurement.tobs))
+        .filter(measurement.date >= date)
         .all()
     )
 
-    temp_dict = {
-        "max": max_temp,
-        "min": min_temp,
-        "avg": avg_temp
+    temp_dictionary = {
+        "Maximum_Tempeture": maximum,
+        "Minimum_Tempeture": minimum,
+        "Average_Tempeture": average,
     }
 
-    return jsonify(temp_dict)
+    return jsonify(temp_dictionary)
     
+@app.route("/api/v1.0/<start>/<end>")
+def range(start,end):
+    print(f"Server received a GET request on /api/v1.0/{start}/{end}")
+    
+    
+    maximum2 = (
+        session
+        .query(func.max(measurement.tobs))
+        .filter(and_(measurement.date >= start, measurement.date <= end))
+        .all()
+    )
 
+    minimum2 = (
+        session
+        .query(func.min(measurement.tobs))
+        .filter(and_(measurement.date >= start, measurement.date <= end))
+        .all()
+    )
+    
+    average2 = (
+        session
+        .query(func.avg(measurement.tobs))
+        .filter(and_(measurement.date >= start, measurement.date <= end))
+        .all()
+    )
 
+    temp_dictionary2 = {
+        "Maximum_Tempeture": maximum2,
+        "Minimum_Tempeture": minimum2,
+        "Average_Tempeture": average2,
+    }
 
-
-
-
+    return jsonify(temp_dictionary2)
 
 if __name__ == "__main__":
     app.run(debug=True)
